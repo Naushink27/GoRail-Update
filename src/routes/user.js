@@ -58,8 +58,7 @@ userRouter.post('/login',async(req, res)=>{
           })
          }
            const token= await user.getJWT()
-           res.cookie("token",token
-           )
+          res.cookie("token",token)
 
          res.status(200).json({
             success:true,

@@ -24,7 +24,7 @@ const userAuth = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: "Invalid User!!!!" });
     }
-
+console.log(user)
     req.user = user;
     next(); // ✅ Pass control to the next middleware
 

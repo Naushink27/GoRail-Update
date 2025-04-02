@@ -3,10 +3,11 @@ const app= express();
 const connectDB= require('./src/config/database')
 const userRouter= require('./src/routes/user')
 const cookieParser=require("cookie-parser");
-
+const adminRouter=require('./src/routes/admin')
 app.use(express.json())
 app.use(cookieParser())
 app.use('/', userRouter)
+app.use('/',adminRouter)
 
 
 connectDB().then(()=>{
