@@ -4,11 +4,12 @@ const connectDB= require('./src/config/database')
 const userRouter= require('./src/routes/user')
 const cookieParser=require("cookie-parser");
 const adminRouter=require('./src/routes/admin')
+const trainRouter=require('./src/routes/userTrain')
 app.use(express.json())
 app.use(cookieParser())
 app.use('/', userRouter)
 app.use('/',adminRouter)
-
+app.use('/',trainRouter)
 
 connectDB().then(()=>{
     console.log("MongoDB connected successfully")

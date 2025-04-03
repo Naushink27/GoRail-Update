@@ -10,6 +10,7 @@ const userAuth = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ error: "Please login first" }); // ✅ Send 401 Unauthorized
     }
+    
 
     // ✅ Verify Token
     console.log("verifying JWT token")
@@ -23,6 +24,9 @@ const userAuth = async (req, res, next) => {
    
     if (!user) {
       return res.status(401).json({ error: "Invalid User!!!!" });
+    }
+    if(user.role!="user"){
+      return res.status(401).json({error:"Cant access this page!!"})
     }
 console.log(user)
     req.user = user;
