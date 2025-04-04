@@ -5,8 +5,12 @@ const userRouter= require('./src/routes/user')
 const cookieParser=require("cookie-parser");
 const adminRouter=require('./src/routes/admin')
 const trainRouter=require('./src/routes/userTrain')
+const paymentRoutes = require('./src/routes/payment'); // Import the payment route
 app.use(express.json())
 app.use(cookieParser())
+
+app.use(express.json()); // after webhook route
+app.use("/", paymentRoutes); // before express.json()
 app.use('/', userRouter)
 app.use('/',adminRouter)
 app.use('/',trainRouter)

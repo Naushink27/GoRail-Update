@@ -22,5 +22,12 @@
 * View all Trains api(For Admin).
 
 
+# Day 3:
+*  Train searching API (For User.)
+*  Have to study later on times and dates.
+* 
 
+# Day4:
+* Train booking API.
+* 
 

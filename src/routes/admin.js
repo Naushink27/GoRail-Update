@@ -8,6 +8,7 @@ const moment= require('moment-timezone')
 adminRouter.post("/add/train", adminAuth, async (req, res) => {
     try {
         let { number, name, source, destination, journeyDate, departureTime, arrivalTime, seats } = req.body;
+        let trainStatus="unavailable"
 
         // ✅ Validating fields
         if (!number || !name || !source || !destination || !journeyDate || !departureTime || !arrivalTime || !seats) {
@@ -37,6 +38,9 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
         if (isNaN(formattedDepartureTime) || isNaN(formattedArrivalTime)) {
             return res.status(400).json({ message: "Invalid date format for departureTime or arrivalTime" });
         }
+        if(seats.length!=0){
+           trainStatus="available"
+        }
 
         // Step 3: Create the train document
         const train = new Train({
@@ -47,7 +51,8 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
             journeyDate: formattedJourneyDate,
             departureTime: formattedDepartureTime,
             arrivalTime: formattedArrivalTime,
-            seats
+            seats,
+            trainStatus
         });
 
         // Save the train document

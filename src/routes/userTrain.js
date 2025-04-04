@@ -1,10 +1,14 @@
 const express= require('express')
 const {userAuth}=require('../middleware/userAuth');
 const Train = require('../model/train');
-
+const Booking= require('../model/booking')
 const trainRouter=express.Router();
+const Razorpay = require("razorpay");
 
-
+const instance = new Razorpay({
+  key_id: 'rzp_test_Ajos5K0E47aZxK',
+  key_secret:'wUKfsQDoLPx0JBpCiHHIdQ2D',
+});
 
 trainRouter.get('/train', userAuth, async (req, res) => {
     try {
@@ -35,6 +39,59 @@ trainRouter.get('/train', userAuth, async (req, res) => {
       res.status(500).json({ message: err.message });
     }
   });
+  
+ 
+trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    const { _id } = user;
+    const { trainId } = req.params;
+    const { journeyDate, seatType } = req.body;
+
+    const train = await Train.findById(trainId);
+    if (!train) return res.status(404).json({ message: "Train not found" });
+
+    if (train.trainStatus !== "available")
+      return res.status(400).json({ message: "Train not available" });
+
+    const seat = train.seats.find(seat => seat.type === seatType);
+    if (!seat || seat.count <= 0)
+      return res.status(400).json({ message: "Seat not available" });
+
+    // 👇 Create Razorpay Order First
+    const amount = 50000; // Rs. 500.00 in paise
+    const order = await instance.orders.create({
+      amount,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    });
+
+    // 👇 Save booking to DB with Razorpay Order ID
+    const booking = new Booking({
+      userId: _id,
+      trainId: train._id,
+      journeyDate,
+      seatType,
+      paymentStatus: "pending",
+      razorpayOrderId: order.id, // ✅ Store Razorpay order ID
+    });
+
+    seat.count -= 1;
+    await train.save();
+    await booking.save();
+
+    res.status(200).json({
+      message: "Booking created. Complete payment to confirm.",
+      razorpayOrderId: order.id,
+      amount,
+      currency: "INR",
+      bookingId: booking._id,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
   
   
 module.exports=trainRouter;

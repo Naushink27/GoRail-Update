@@ -50,7 +50,12 @@ const trainSchema = new mongoose.Schema({
             type: { type: String, required: true }, // ✅ Correctly defining the object structure
             count: { type: Number, required: true }
         }
-    ]
+    ],
+    trainStatus:{
+        type: String,
+        required: true,
+        enum: ['available', 'unavailable']
+    }
 });
 
 const Train = mongoose.model("Train", trainSchema);
