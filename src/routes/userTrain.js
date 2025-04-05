@@ -50,6 +50,7 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
 
     const train = await Train.findById(trainId);
     if (!train) return res.status(404).json({ message: "Train not found" });
+    console.log(train);
 
     if (train.trainStatus !== "available")
       return res.status(400).json({ message: "Train not available" });
@@ -58,10 +59,12 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     if (!seat || seat.count <= 0)
       return res.status(400).json({ message: "Seat not available" });
 
-    // 👇 Create Razorpay Order First
-    const amount = 50000; // Rs. 500.00 in paise
+    let amount= train.amount.find(seat => seat.type === seatType).amount;
+    if (!amount) return res.status(400).json({ message: "Amount not found" });
+
+ ``
     const order = await instance.orders.create({
-      amount,
+      amount:amount*100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
@@ -92,6 +95,15 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-  
+
+
+
+
+
+
+
+module.exports = trainRouter;
+
+
   
 module.exports=trainRouter;

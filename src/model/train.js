@@ -51,6 +51,10 @@ const trainSchema = new mongoose.Schema({
             count: { type: Number, required: true }
         }
     ],
+amount:[{
+    type:{type:String, required:true},
+    amount:{type:Number, required:true}
+}],
     trainStatus:{
         type: String,
         required: true,

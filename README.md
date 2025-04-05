@@ -29,5 +29,8 @@
 
 # Day4:
 * Train booking API.
-* 
+
+# Day5:
+* Payment API.
+* Updating paymentStatus after succesful payment in db.
 

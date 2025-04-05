@@ -1,26 +1,30 @@
-const express= require('express');
-const app= express();
-const connectDB= require('./src/config/database')
-const userRouter= require('./src/routes/user')
-const cookieParser=require("cookie-parser");
-const adminRouter=require('./src/routes/admin')
-const trainRouter=require('./src/routes/userTrain')
-const paymentRoutes = require('./src/routes/payment'); // Import the payment route
-app.use(express.json())
-app.use(cookieParser())
+const express = require("express");
+const app = express();
+const connectDB = require("./src/config/database");
+const cookieParser = require("cookie-parser");
 
-app.use(express.json()); // after webhook route
-app.use("/", paymentRoutes); // before express.json()
-app.use('/', userRouter)
-app.use('/',adminRouter)
-app.use('/',trainRouter)
+const userRouter = require("./src/routes/user");
+const adminRouter = require("./src/routes/admin");
+const trainRouter = require("./src/routes/userTrain");
+const webhookRouter = require("./src/routes/paymentWebhook");
 
-connectDB().then(()=>{
-    console.log("MongoDB connected successfully")
-  
-    app.listen(7777,()=>{
-        console.log("Server is running on port 7777")
-    })
-}).catch((err)=>{
-    console.error(err.message);
-})
+// 👇 THIS MUST COME FIRST!
+app.use("/train/payment/webhook", express.raw({ type: "application/json" }));
+
+// 👇 THEN use regular middleware
+app.use(express.json());
+app.use(cookieParser());
+
+// 👇 Setup your routers
+app.use("/", userRouter);
+app.use("/", adminRouter);
+app.use("/", trainRouter);
+app.use("/", webhookRouter); // ✅ just this for webhook
+
+// Connect DB and start server
+connectDB().then(() => {
+  console.log("MongoDB Connected ✅");
+  app.listen(7777, () => {
+    console.log("Server running on port 7777 🚀");
+  });
+}).catch((err) => console.error("DB Error:", err));

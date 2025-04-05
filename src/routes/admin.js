@@ -7,11 +7,11 @@ const moment= require('moment-timezone')
 
 adminRouter.post("/add/train", adminAuth, async (req, res) => {
     try {
-        let { number, name, source, destination, journeyDate, departureTime, arrivalTime, seats } = req.body;
+        let { number, name, source, destination, journeyDate, departureTime, arrivalTime, seats ,amount} = req.body;
         let trainStatus="unavailable"
 
         // ✅ Validating fields
-        if (!number || !name || !source || !destination || !journeyDate || !departureTime || !arrivalTime || !seats) {
+        if (!number || !name || !source || !destination || !journeyDate || !departureTime || !arrivalTime || !seats||!amount) {
             return res.status(400).json({ message: "All fields are mandatory!!" });
         }
 
@@ -52,7 +52,8 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
             departureTime: formattedDepartureTime,
             arrivalTime: formattedArrivalTime,
             seats,
-            trainStatus
+            trainStatus,
+            amount
         });
 
         // Save the train document
