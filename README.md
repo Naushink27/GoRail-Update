@@ -34,3 +34,13 @@
 * Payment API.
 * Updating paymentStatus after succesful payment in db.
 
+# Day 6:
+* Create payment db and on succesful payment will create instace of that db.
+* Admin api to get all bookings.
+* Booking verify apis.
+* Email sending once succefully confirmed or cancelled ticket.
+* Get user there  all bookings.
+
+
+
+

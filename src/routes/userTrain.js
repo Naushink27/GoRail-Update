@@ -77,6 +77,11 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
       seatType,
       paymentStatus: "pending",
       razorpayOrderId: order.id, // ✅ Store Razorpay order ID
+      amount: amount,
+      name: user.firstName,
+      email: user.email,
+      source: train.source,
+      destination: train.destination,
     });
 
     seat.count -= 1;
@@ -95,6 +100,20 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+trainRouter.get("/train/bookings", userAuth, async (req, res) => {
+
+  try{
+    const user=req.user;
+
+    const { _id } = user;
+
+    const bookings=await Booking.find({userId:_id})
+    res.status(200).json({message:"Bookings fetched",bookings})
+  }catch(err){
+    res.status(500).json({message:err.message})
+  }
+})
 
 
 

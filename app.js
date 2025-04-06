@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./src/routes/user");
 const adminRouter = require("./src/routes/admin");
 const trainRouter = require("./src/routes/userTrain");
+const verifybookingsRouter = require("./src/routes/verifyBookings");
 const webhookRouter = require("./src/routes/paymentWebhook");
 
 // 👇 THIS MUST COME FIRST!
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use("/", userRouter);
 app.use("/", adminRouter);
 app.use("/", trainRouter);
+app.use("/", verifybookingsRouter); // ✅ just this for admin
 app.use("/", webhookRouter); // ✅ just this for webhook
 
 // Connect DB and start server

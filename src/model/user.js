@@ -54,7 +54,7 @@ const userSchema= new mongoose.Schema({
         type:String,
         default: "user",
     }
-})
+},{timestamps:true})
 
 userSchema.methods.validatePassword= async function(passwordInputByUser){
 const user= this;

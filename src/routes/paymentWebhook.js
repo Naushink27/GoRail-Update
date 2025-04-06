@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const Booking = require("../model/booking");
+const Payment = require("../model/payment");
 
 router.post(
   "/train/payment/webhook",
@@ -20,10 +21,11 @@ router.post(
     if (signature === expectedSignature) {
       const payload = JSON.parse(body);
       console.log("✅ Webhook Received", payload);
-
+      const orderId = payload.payload.payment.entity.order_id;
+      const booking = await Booking.findOne({ razorpayOrderId: orderId });
       if (payload.event === "payment.captured") {
-        const orderId = payload.payload.payment.entity.order_id;
-        const booking = await Booking.findOne({ razorpayOrderId: orderId });
+  
+       
 
         if (booking) {
           booking.paymentStatus = "completed";
@@ -32,7 +34,16 @@ router.post(
         }
       }
 
-      res.status(200).json({ status: "ok" });
+      const payment= await Payment({
+        userId: booking.userId,
+        trainId: booking.trainId,
+        amount: booking.amount,
+        orderId: booking.razorpayOrderId,
+        paymentId: payload.payload.payment.entity.id,
+      })
+    payment.save()
+
+      res.status(200).json({ status: "ok" ,payment});
     } else {
       res.status(400).json({ status: "invalid signature" });
     }

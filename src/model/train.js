@@ -60,7 +60,7 @@ amount:[{
         required: true,
         enum: ['available', 'unavailable']
     }
-});
+},{timestamps:true});
 
 const Train = mongoose.model("Train", trainSchema);
 module.exports = Train;

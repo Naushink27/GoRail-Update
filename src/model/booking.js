@@ -35,8 +35,28 @@ const bookingSchema= new mongoose.Schema({
         required:true,
         enum: ['N/A','pending', 'completed', 'failed'],
         default: 'N/A'   
-    }
-})
+    },
+    amount:{
+        type:Number,
+        required:true,
+    },
+    email:{
+        type:String,
+        required:true,
+    },
+    source:{
+        type:String,
+        required:true,
+    },
+    destination:{
+        type:String,
+        required:true,
+    },
+    name:{
+        type:String,
+        required:true,
+    },
+},{timestamps:true})
 
 const Booking= mongoose.model('Booking', bookingSchema);
 module.exports= Booking;
