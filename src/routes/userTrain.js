@@ -26,10 +26,15 @@ trainRouter.get('/train', userAuth, async (req, res) => {
       if (number) {
         query.number = number;
       }
-      if(journeyDate){
-        query.journeyDate=journeyDate
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(journeyDate)) {
+        return res.status(400).json({ message: "Invalid journeyDate format. Use YYYY-MM-DD." });
+    }
+      const parsedJourneyDate = new Date(`${journeyDate}T00:00:00Z`);
+      if(parsedJourneyDate){
+        query.journeyDate = parsedJourneyDate;
       }
-  
+      
+      
       // Perform the query
       const train = await Train.find(query);
   
@@ -46,11 +51,13 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     const user = req.user;
     const { _id } = user;
     const { trainId } = req.params;
-    const { journeyDate, seatType } = req.body;
+    let { journeyDate, seatType } = req.body;
+    seatType = seatType.toLowerCase();
 
     const train = await Train.findById(trainId);
     if (!train) return res.status(404).json({ message: "Train not found" });
     console.log(train);
+    const departureTime= train.departureTime.toISOString().split("T")[1].split("Z")[0]; 
 
     if (train.trainStatus !== "available")
       return res.status(400).json({ message: "Train not available" });
@@ -69,11 +76,13 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
       receipt: `receipt_${Date.now()}`,
     });
 
+    const trainDate= new Date(`${journeyDate}T${departureTime}Z`);
+
     // 👇 Save booking to DB with Razorpay Order ID
     const booking = new Booking({
       userId: _id,
       trainId: train._id,
-      journeyDate,
+      journeyDate: trainDate,
       seatType,
       paymentStatus: "pending",
       razorpayOrderId: order.id, // ✅ Store Razorpay order ID

@@ -2,88 +2,116 @@ const express = require('express');
 const { adminAuth } = require('../middleware/adminAuth');
 const Train = require('../model/train');
 const adminRouter = express.Router();
-const moment= require('moment-timezone')
+
 
 
 adminRouter.post("/add/train", adminAuth, async (req, res) => {
     try {
-        let { number, name, source, destination, journeyDate, departureTime, arrivalTime, seats ,amount} = req.body;
-        let trainStatus="unavailable"
+        let { number, name, source, destination, journeyDate, departureTime, arrivalTime, seats, amount } = req.body;
+        let trainStatus = "unavailable";
 
-        // ✅ Validating fields
-        if (!number || !name || !source || !destination || !journeyDate || !departureTime || !arrivalTime || !seats||!amount) {
-            return res.status(400).json({ message: "All fields are mandatory!!" });
+        // ✅ 1. Validate all required fields
+        if (!number || !name || !source || !destination || !journeyDate || !departureTime || !arrivalTime || !seats || !amount) {
+            return res.status(400).json({ message: "All fields are mandatory!" });
         }
 
-        // ✅ Convert string date values into Date objects
-        const defaultTime = "00:00:00"; // Default time to midnight if not provided
-
-        // Step 1: Ensure journeyDate is in the correct format (DD-MM-YYYY)
-        // Combine date with default time (00:00:00)
-        const adminDateTime = `${journeyDate} ${defaultTime}`;
-
-        // Convert the date to UTC and then to a JavaScript Date object
-        const formattedJourneyDate = moment.tz(adminDateTime, "DD-MM-YYYY HH:mm:ss", "Asia/Kolkata").utc().toDate();
-
-        // Check if formattedJourneyDate is valid
-        if (isNaN(formattedJourneyDate)) {
-            return res.status(400).json({ message: "Invalid date format for journeyDate" });
+        // ✅ 2. Check journeyDate format (YYYY-MM-DD)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(journeyDate)) {
+            return res.status(400).json({ message: "Invalid journeyDate format. Use YYYY-MM-DD." });
         }
 
-        // Step 2: Convert departureTime and arrivalTime to valid Date objects
-        const formattedDepartureTime = new Date(departureTime); // Ensure valid Date object
-        const formattedArrivalTime = new Date(arrivalTime); // Ensure valid Date object
-
-        // Validate departureTime and arrivalTime
-        if (isNaN(formattedDepartureTime) || isNaN(formattedArrivalTime)) {
-            return res.status(400).json({ message: "Invalid date format for departureTime or arrivalTime" });
-        }
-        if(seats.length!=0){
-           trainStatus="available"
+        // ✅ 3. Check time format (HH:MM:SS)
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+        if (!timeRegex.test(departureTime) || !timeRegex.test(arrivalTime)) {
+            return res.status(400).json({ message: "Invalid time format. Use HH:MM:SS." });
         }
 
-        // Step 3: Create the train document
+        // ✅ 4. Convert date and time to UTC
+        const parsedJourneyDate = new Date(`${journeyDate}T00:00:00Z`);
+        const parsedDepartureTime = new Date(`1970-01-01T${departureTime}Z`);
+        const parsedArrivalTime = new Date(`1970-01-01T${arrivalTime}Z`);
+
+        // ✅ 5. Validate actual conversion
+        if (isNaN(parsedJourneyDate) || isNaN(parsedDepartureTime) || isNaN(parsedArrivalTime)) {
+            return res.status(400).json({ message: "Invalid date or time format." });
+        }
+
+        // ✅ 6. Set train status
+        if (Array.isArray(seats) && seats.length > 0) {
+            trainStatus = "available";
+        }
+
+        // ✅ 7. Create train document
         const train = new Train({
             number,
             name,
             source,
             destination,
-            journeyDate: formattedJourneyDate,
-            departureTime: formattedDepartureTime,
-            arrivalTime: formattedArrivalTime,
+            journeyDate: parsedJourneyDate,
+            departureTime: parsedDepartureTime,
+            arrivalTime: parsedArrivalTime,
             seats,
             trainStatus,
             amount
         });
 
-        // Save the train document
         await train.save();
-        
+
         res.status(201).json({ message: "Train added successfully!", train });
+
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Error adding train:", err);
+        res.status(500).json({ message: "Something went wrong on the server." });
     }
 });
 
 
-adminRouter.patch("/update/train/:id",adminAuth,async(req,res)=>{
-    try{
-        const {id}=req.params;
-        const {departureTime,arrivalTime,journeyDate,seats}=req.body;
-        const train=await Train.findByIdAndUpdate(id,{
-            departureTime,
-            arrivalTime,
-            journeyDate,
-            seats
-        })
-        await train.save();
-        res.status(200).json({message:"Train details updated succesfully!!"})
 
+adminRouter.patch("/update/train/:id", adminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      let { departureTime, arrivalTime, journeyDate, seats } = req.body;
+  
+      let parsedJourneyDate, parsedDepartureTime, parsedArrivalTime;
+  
+      if (journeyDate) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(journeyDate)) {
+          return res.status(400).json({ message: "Invalid journeyDate format. Use YYYY-MM-DD." });
+        }
+        parsedJourneyDate = new Date(`${journeyDate}T00:00:00Z`);
+      }
+  
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+  
+      if (departureTime) {
+        if (!timeRegex.test(departureTime)) {
+          return res.status(400).json({ message: "Invalid departureTime format. Use HH:MM:SS." });
+        }
+        parsedDepartureTime = new Date(`1970-01-01T${departureTime}Z`);
+      }
+  
+      if (arrivalTime) {
+        if (!timeRegex.test(arrivalTime)) {
+          return res.status(400).json({ message: "Invalid arrivalTime format. Use HH:MM:SS." });
+        }
+        parsedArrivalTime = new Date(`1970-01-01T${arrivalTime}Z`);
+      }
+  
+      const updateObj = {};
+      if (parsedJourneyDate) updateObj.journeyDate = parsedJourneyDate;
+      if (parsedDepartureTime) updateObj.departureTime = parsedDepartureTime;
+      if (parsedArrivalTime) updateObj.arrivalTime = parsedArrivalTime;
+      if (seats) updateObj.seats = seats;
+  
+      await Train.findByIdAndUpdate(id, updateObj);
+  
+      res.status(200).json({ message: "Train details updated successfully!" });
+  
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-    catch(err){
-        res.status(500).json({message:err.message})
-    }
-})
+  });
+  
 
 adminRouter.get("/view/trains",adminAuth,async(req,res)=>{
     try{

@@ -27,7 +27,19 @@ verifyBookingsRouter.post('/verifybooking/:status/:bookingId',adminAuth,async(re
             return res.status(404).json({message:"Booking not found"})
         }
         if(booking.journeyStatus==='waiting'){
-            booking.journeyStatus=status;
+            if(status==='confirmed'){
+                if(booking.paymentStatus==='completed'){
+                    booking.journeyStatus='confirmed'
+                }
+                else if(booking.paymentStatus==='pending'){
+                    throw new Error("Payment is pending")
+                    
+                }
+                else{
+                    booking.journeyStatus='cancelled'
+                }
+          
+            }
         await booking.save();
         await sendMail(booking, status);
         res.status(200).json({message:"Booking status updated",booking})

@@ -41,6 +41,15 @@
 * Email sending once succefully confirmed or cancelled ticket.
 * Get user there  all bookings.
 
+# Day 7:
+
+# Day 8:
+* ALL API testing.
+* Checking what if train is full.
+* What if payment failed?
+* Date and time formats are consistents.
+ 
+ ***********************Backend Completed********************
 
 
 
