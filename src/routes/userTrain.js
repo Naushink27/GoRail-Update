@@ -52,7 +52,7 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     const { _id } = user;
     const { trainId } = req.params;
     let { journeyDate, seatType } = req.body;
-    seatType = seatType.toLowerCase();
+    seatType = seatType;
 
     const train = await Train.findById(trainId);
     if (!train) return res.status(404).json({ message: "Train not found" });
