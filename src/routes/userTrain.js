@@ -10,40 +10,50 @@ const instance = new Razorpay({
   key_secret:'wUKfsQDoLPx0JBpCiHHIdQ2D',
 });
 
-trainRouter.get('/train', userAuth, async (req, res) => {
-    try {
-      let { source, destination, number, journeyDate } = req.body;
-  
-    
-      // Construct the query object for source, destination, number
-      const query = {};
-      if (source) {
-        query.source = { $regex: new RegExp(source, 'i') };
-      }
-      if (destination) {
-        query.destination = { $regex: new RegExp(destination, 'i') };
-      }
-      if (number) {
-        query.number = number;
-      }
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(journeyDate)) {
-        return res.status(400).json({ message: "Invalid journeyDate format. Use YYYY-MM-DD." });
+trainRouter.post('/train', async (req, res) => {
+  try {
+    let { source, destination, number, journeyDate ,seatType} = req.body;
+if(!source && !destination && !number && !journeyDate && !seatType) {
+      return res.status(500).json({ message: "Please provide at least one search parameter." });
+}
+    const query = {};
+    if (source) {
+      query.source = { $regex: new RegExp(source, 'i') };
     }
-      const parsedJourneyDate = new Date(`${journeyDate}T00:00:00Z`);
-      if(parsedJourneyDate){
-        query.journeyDate = parsedJourneyDate;
-      }
-      
-      
-      // Perform the query
-      const train = await Train.find(query);
-  
-      // Send the result back
-      res.send(train);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+    if (destination) {
+      query.destination = { $regex: new RegExp(destination, 'i') };
     }
-  });
+    if (number) {
+      query.number = number;
+    }
+
+  if(journeyDate){  if (!/^\d{4}-\d{2}-\d{2}$/.test(journeyDate)) {
+      return res.status(500).json({ message: "Invalid journeyDate format. Use YYYY-MM-DD." });
+
+    }
+
+    const parsedJourneyDate = new Date(`${journeyDate}T00:00:00Z`);
+    if (parsedJourneyDate) {
+      query.journeyDate = parsedJourneyDate;
+    }
+
+  }
+  if(seatType) {
+      if (!["Sleeper", "AC"].includes(seatType)) {
+        return res.status(400).json({ message: "Invalid seat type. Use 'Sleeper' or 'AC'." });
+      }
+    query.seatType= seatType.type;
+  }
+
+   
+
+    const train = await Train.find(query);
+    res.status(200).json({ message: "Trains fetched", train });
+
+  } catch (err) {
+    res.status(500).send(err.message);}
+});
+
   
  
 trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
