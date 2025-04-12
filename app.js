@@ -14,7 +14,7 @@ app.use("/train/payment/webhook", express.raw({ type: "application/json" }));
 
 // 👇 THEN use regular middleware
 app.use(cors({
-  origin: "http://localhost:3001",
+  origin: "http://localhost:3000",
   credentials: true,
 }));
 app.use(express.json());
