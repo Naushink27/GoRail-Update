@@ -72,7 +72,7 @@ userRouter.post('/login',async(req, res)=>{
         })
     }
 })
-userRouter.get('/logout',userAuth,async(req, res)=>{
+userRouter.post('/logout',userAuth,async(req, res)=>{
     try{
         res.cookie("token",null,{
             expires: new Date(Date.now())
