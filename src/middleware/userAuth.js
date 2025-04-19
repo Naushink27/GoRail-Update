@@ -5,6 +5,8 @@ const userAuth = async (req, res, next) => {
   try {
     // ✅ Ensure req.cookies is defined before accessing `token`
     const token = req.cookies?.token 
+  
+    console.log(token)
    
 
     if (!token) {
@@ -12,7 +14,7 @@ const userAuth = async (req, res, next) => {
     }
     
 
-    // ✅ Verify Token
+    // ✅ Verify Token  
     console.log("verifying JWT token")
     const decodedData = jwt.verify(token, 'goRailway@123');
     console.log(decodedData)

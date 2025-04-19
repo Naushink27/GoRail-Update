@@ -1,6 +1,7 @@
 const express = require('express');
 const { adminAuth } = require('../middleware/adminAuth');
 const Train = require('../model/train');
+const User=require('../model/user')
 const adminRouter = express.Router();
 
 
@@ -123,4 +124,25 @@ adminRouter.get("/view/trains",adminAuth,async(req,res)=>{
     }
 })
 
+adminRouter.get("/view/users",adminAuth,async(req,res)=>{
+  try{
+
+    const users= await User.find({role:'user'});
+    res.status(200).json({messgae:"Success",data:users})
+
+  }catch(Err){
+    res.status(500).json({message:Err.message})
+  }
+})
+
+adminRouter.delete("/delete/user/:userId",adminAuth,async(req,res)=>{
+  try{
+     const deleteUser=await User.findByIdAndDelete(req.params.userId)
+     if(!deleteUser){
+      throw new Error('Invalid user!!')
+
+     }
+     res.status(200).json({message:'success'})
+  }catch(Err){res.status(500).json({message:Err.message})}
+})
 module.exports = adminRouter;

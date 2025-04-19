@@ -62,7 +62,8 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
     const { _id } = user;
     const { trainId } = req.params;
     let { journeyDate, seatType } = req.body;
-    seatType = seatType;
+console.log(journeyDate)
+  
 
     const train = await Train.findById(trainId);
     if (!train) return res.status(404).json({ message: "Train not found" });
@@ -78,15 +79,22 @@ trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
 
     let amount= train.amount.find(seat => seat.type === seatType).amount;
     if (!amount) return res.status(400).json({ message: "Amount not found" });
-
+ 
+     if(!journeyDate ||!seatType){
+      throw new Error('All field are required')
+     }
  ``
     const order = await instance.orders.create({
       amount:amount*100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
-
-    const trainDate= new Date(`${journeyDate}T${departureTime}Z`);
+    
+    const trainDate = new Date(journeyDate); 
+    if(!trainDate){
+      throw new Error("Invalid ddate")
+    }
+    
 
     // 👇 Save booking to DB with Razorpay Order ID
     const booking = new Booking({
@@ -130,6 +138,31 @@ trainRouter.get("/train/bookings", userAuth, async (req, res) => {
     const bookings=await Booking.find({userId:_id})
     res.status(200).json({message:"Bookings fetched",bookings})
   }catch(err){
+    res.status(500).json({message:err.message})
+  }
+})
+
+trainRouter.get("/allbookings/:userId",userAuth,async(req,res)=>{
+try{
+const userId=req.params.userId;
+console.log(userId)
+const data= await Booking.find({userId:userId})
+res.status(200).json({message:"Success",data})
+console.log(data)
+
+}catch(err){
+  res.status(500).json({message:err.message})
+}
+})
+
+trainRouter.post("/train/orders/:bookingId",userAuth,async(req,res)=>{
+  try{ 
+       const bookingId=req.params.bookingId;
+      const data= await Booking.find({_id:bookingId})
+      res.status(200).json({messgae:'success',data:data})
+
+  }catch(err){
+  
     res.status(500).json({message:err.message})
   }
 })
