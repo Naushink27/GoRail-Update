@@ -37,6 +37,20 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
             return res.status(400).json({ message: "Invalid date or time format." });
         }
 
+        if(isNaN(number)||number.length<5){
+            throw new Error("Invalid Train Number")
+        }
+        if(name.length<3){
+            throw new Error("Train name should be at least 3 characters long")
+        }
+        if(source.length<3){
+            throw new Error("Source should be at least 3 characters long")
+        }
+        if(destination.length<3){
+            throw new Error("Destination should be at least 3 characters long")
+        }
+        
+
         // ✅ 6. Set train status
         if (Array.isArray(seats) && seats.length > 0) {
             trainStatus = "available";
@@ -56,16 +70,32 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
             amount
         });
 
-        await train.save();
+        await  train.save();
+        console.log("Train added successfully:", train);
 
         res.status(201).json({ message: "Train added successfully!", train });
 
     } catch (err) {
         console.error("Error adding train:", err);
-        res.status(500).json({ message: "Something went wrong on the server." });
+        res.status(500).json({ message: err.message });
     }
 });
-
+adminRouter.post('/logoutAdmin',adminAuth,async(req, res)=>{
+  try{
+      res.cookie("token",null,{
+          expires: new Date(Date.now())
+      })
+      res.status(200).json({
+          success:true,
+          message:"Logout successful"
+      })
+  }catch(err){
+      res.status(500).json({
+          success:false,
+          message:err.message
+      })
+  }
+})
 
 
 adminRouter.patch("/update/train/:id", adminAuth, async (req, res) => {
@@ -113,7 +143,19 @@ adminRouter.patch("/update/train/:id", adminAuth, async (req, res) => {
     }
   });
   
+adminRouter.delete("/delete/train/:id", adminAuth, async (req, res) => {
+  try{
+    const{id}=req.params;
+    const train =await Train.findByIdAndDelete(id);
+    if(!train){
+      return res.status(404).json({message:"Train not found"})
+    }
+    res.status(200).json({message:"Train deleted successfully"})
+  }catch(err){
+    res.status(500).json({message:err.message})
 
+  }
+})
 adminRouter.get("/view/trains",adminAuth,async(req,res)=>{
     try{
       const trains= await Train.find();

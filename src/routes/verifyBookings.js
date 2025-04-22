@@ -37,9 +37,11 @@ verifyBookingsRouter.post('/verifybooking/:status/:bookingId',adminAuth,async(re
                 }
                 else{
                     booking.journeyStatus='cancelled'
+                }}
+                else if (status === 'cancelled') {
+                    booking.journeyStatus = 'cancelled'; // ✅ Properly handle this!
                 }
-          
-            }
+            
         await booking.save();
         await sendMail(booking, status);
         res.status(200).json({message:"Booking status updated",booking})
