@@ -17,8 +17,22 @@ const bookingSchema= new mongoose.Schema({
     seatType:{
         type:String,
         required:true,
-        enum:['Sleeper','AC'],
+        enum:['Sleeper','AC','General','First Class'],
     },
+    passengers: [{
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
+        age: {
+          type: Number,
+          required: true
+        },
+      }],
     razorpayOrderId: {
         type: String,
         required: true,

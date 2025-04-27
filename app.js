@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const app = express();
 const connectDB = require("./src/config/database");
@@ -26,7 +27,9 @@ app.use("/", adminRouter);
 app.use("/", trainRouter);
 app.use("/", verifybookingsRouter); // ✅ just this for admin
 app.use("/", webhookRouter); // ✅ just this for webhook
-
+app.get("/",(req,res)=>{
+  res.send("APi is running ")
+})
 // Connect DB and start server
 connectDB().then(() => {
   console.log("MongoDB Connected ✅");

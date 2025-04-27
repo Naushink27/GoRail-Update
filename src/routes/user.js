@@ -3,6 +3,8 @@ const userRouter= express.Router();
 const bcrypt= require('bcrypt')
 const User= require('../model/user');
 const { userAuth } = require('../middleware/userAuth');
+const nodemailer = require('nodemailer');
+require('dotenv').config()
 userRouter.post('/signup',async(req, res)=>{
     try{
           const {firstName,lastName,email,password}= req.body;
@@ -88,4 +90,42 @@ userRouter.post('/logout',userAuth,async(req, res)=>{
         })
     }
 })
+userRouter.post('/api/contact', async (req, res) => {
+    const { name, email, message } = req.body;
+    
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+  
+    try {
+      // Create transporter
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL, // Your Gmail address
+          pass: process.env.EMAIL_PASS, // App password (NOT your normal Gmail password)
+        },
+      });
+  
+      // Email options
+      let mailOptions = {
+        from: email, // Sender's email
+        to: process.env.EMAIL, // Your Gmail where you want to receive the message
+        subject: `Contact Us Message from ${name}`,
+        html: `
+          <h2>New Contact Form Message</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
+        `,
+      }
+      await transporter.sendMail(mailOptions);
+
+      res.json({ success: 'Message sent successfully!' });
+    } catch (error) {
+      console.error('Error sending mail:', error);
+      res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    }
+  });
 module.exports= userRouter;

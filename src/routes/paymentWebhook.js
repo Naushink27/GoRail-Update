@@ -9,7 +9,7 @@ router.post(
   "/train/payment/webhook",
   express.raw({ type: "application/json" }), // Razorpay needs raw body
   async (req, res) => {
-    const secret = "goRail@123";
+    const secret = process.env.RAZORPAY_SECRET; 
     const signature = req.headers["x-razorpay-signature"];
     const body = req.body;
 

@@ -4,10 +4,11 @@ const Train = require('../model/train');
 const Booking= require('../model/booking')
 const trainRouter=express.Router();
 const Razorpay = require("razorpay");
+const mongoose = require('mongoose');
 
 const instance = new Razorpay({
-  key_id: 'rzp_test_Ajos5K0E47aZxK',
-  key_secret:'wUKfsQDoLPx0JBpCiHHIdQ2D',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret:process.env.RAZORPAY_KEY_SECRET,
 });
 
 trainRouter.post('/train', async (req, res) => {
@@ -54,79 +55,117 @@ if(!source && !destination && !number && !journeyDate && !seatType) {
     res.status(500).send(err.message);}
 });
 
-  
+
  
 trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const user = req.user;
-    const { _id } = user;
+    const { _id: userId } = user;
     const { trainId } = req.params;
-    let { journeyDate, seatType } = req.body;
-console.log(journeyDate)
-  
+    const { journeyDate, seatType, passengers } = req.body;
 
-    const train = await Train.findById(trainId);
-    if (!train) return res.status(404).json({ message: "Train not found" });
-    console.log(train);
-    const departureTime= train.departureTime.toISOString().split("T")[1].split("Z")[0]; 
+    // Input validation
+    if (!trainId || !mongoose.Types.ObjectId.isValid(trainId)) {
+      return res.status(400).json({ message: 'Invalid train ID' });
+    }
+    if (!journeyDate || !seatType || !passengers || !Array.isArray(passengers) || passengers.length === 0) {
+      return res.status(400).json({ message: 'Journey date, seat type, and at least one passenger are required' });
+    }
+    const validSeatTypes = ['General', 'AC', 'Sleeper', 'First Class'];
+    if (!validSeatTypes.includes(seatType)) {
+      return res.status(400).json({ message: 'Invalid seat type' });
+    }
+    const parsedJourneyDate = new Date(journeyDate);
+    if (isNaN(parsedJourneyDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid journey date' });
+    }
 
-    if (train.trainStatus !== "available")
-      return res.status(400).json({ message: "Train not available" });
+    // Validate passengers
+    for (const passenger of passengers) {
+      if (!passenger.firstName || !passenger.lastName || !passenger.age) {
+        return res.status(400).json({ message: 'Each passenger must have a first name, last name, and age' });
+      }
+    }
 
-    const seat = train.seats.find(seat => seat.type === seatType);
-    if (!seat || seat.count <= 0)
-      return res.status(400).json({ message: "Seat not available" });
+    // Find train
+    const train = await Train.findById(trainId).session(session);
+    if (!train) {
+      return res.status(404).json({ message: 'Train not found' });
+    }
+    if (train.trainStatus !== 'available') {
+      return res.status(400).json({ message: 'Train not available' });
+    }
 
-    let amount= train.amount.find(seat => seat.type === seatType).amount;
-    if (!amount) return res.status(400).json({ message: "Amount not found" });
- 
-     if(!journeyDate ||!seatType){
-      throw new Error('All field are required')
-     }
- ``
+    // Check seat availability
+    const seat = train.seats.find((seat) => seat.type === seatType);
+    if (!seat || seat.count < passengers.length) {
+      return res.status(400).json({ message: `Not enough seats available. Requested: ${passengers.length}, Available: ${seat ? seat.count : 0}` });
+    }
+
+    // Get amount
+    const amountObj = train.amount.find((item) => item.type === seatType);
+    if (!amountObj || !amountObj.amount) {
+      return res.status(400).json({ message: 'Amount not found for seat type' });
+    }
+    const amount = amountObj.amount * passengers.length; // Total amount for all passengers
+
+    // Create Razorpay order
     const order = await instance.orders.create({
-      amount:amount*100,
-      currency: "INR",
+      amount: amount * 100, // Convert to paise
+      currency: 'INR',
       receipt: `receipt_${Date.now()}`,
     });
-    
-    const trainDate = new Date(journeyDate); 
-    if(!trainDate){
-      throw new Error("Invalid ddate")
-    }
-    
 
-    // 👇 Save booking to DB with Razorpay Order ID
+    // Create booking
     const booking = new Booking({
-      userId: _id,
+      userId,
       trainId: train._id,
-      journeyDate: trainDate,
+      journeyDate: parsedJourneyDate,
       seatType,
-      paymentStatus: "pending",
-      razorpayOrderId: order.id, // ✅ Store Razorpay order ID
-      amount: amount,
+      paymentStatus: 'pending',
+      razorpayOrderId: order.id,
+      amount,
       name: user.firstName,
       email: user.email,
       source: train.source,
       destination: train.destination,
+      passengers, // Store passenger details
     });
 
-    seat.count -= 1;
-    await train.save();
-    await booking.save();
+    // Update seat count
+    seat.count -= passengers.length;
+
+    // If no seats are left, update train status to 'unavailable'
+    if (seat.count <= 0) {
+      train.trainStatus = 'unavailable'; // Mark train as unavailable
+    }
+
+    // Save changes
+    await train.save({ session });
+    await booking.save({ session });
+
+    // Commit transaction
+    await session.commitTransaction();
 
     res.status(200).json({
-      message: "Booking created. Complete payment to confirm.",
+      message: 'Booking created. Complete payment to confirm.',
       razorpayOrderId: order.id,
       amount,
-      currency: "INR",
+      currency: 'INR',
       bookingId: booking._id,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    await session.abortTransaction();
+    console.error('Booking error:', err);
+    res.status(500).json({ message: err.message || 'An error occurred during booking' });
+  } finally {
+    session.endSession();
   }
 });
+
 
 trainRouter.get("/train/bookings", userAuth, async (req, res) => {
 
@@ -173,7 +212,7 @@ trainRouter.post("/train/orders/:bookingId",userAuth,async(req,res)=>{
 
 
 
-module.exports = trainRouter;
+
 
 
   

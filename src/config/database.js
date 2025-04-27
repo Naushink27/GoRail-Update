@@ -2,7 +2,7 @@ const mongoose= require('mongoose');
 
 const connectDB= async()=>{
     try{
-       await mongoose.connect('mongodb+srv://naushink2709:QGYdB7tZ43JNz9Nt@namastenode.gvret.mongodb.net/GoRail')
+       await mongoose.connect(process.env.MONGODB_URI)
       
     }catch(err){
         console.error(err.message);

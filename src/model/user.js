@@ -65,7 +65,7 @@ return isPasswordValid;
 userSchema.methods.getJWT= async function(){
     const user= this;
 
-    const token = await jwt.sign({_id: user._id,role:user.role},"goRailway@123", {
+    const token = await jwt.sign({_id: user._id,role:user.role},process.env.JWT_SECRET, {
         expiresIn:'1d'
     })
     return token;
