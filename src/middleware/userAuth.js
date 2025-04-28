@@ -16,7 +16,7 @@ const userAuth = async (req, res, next) => {
 
     // ✅ Verify Token  
     console.log("verifying JWT token")
-    const decodedData = jwt.verify(token, 'goRailway@123');
+    const decodedData = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decodedData)
    
     const { _id } = decodedData;
