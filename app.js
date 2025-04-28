@@ -14,14 +14,16 @@ const webhookRouter = require("./src/routes/paymentWebhook");
 app.use("/train/payment/webhook", express.raw({ type: "application/json" }));
 
 // 👇 THEN use regular middleware
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(cors({
   origin: "https://calm-dasik-6a0a70.netlify.app",
   credentials: true, // ✅ Required for cookies/sessions
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-app.use(express.json());
-app.use(cookieParser());
 
 // 👇 Setup your routers
 app.use("/", userRouter);
