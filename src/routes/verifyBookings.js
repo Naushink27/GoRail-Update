@@ -55,5 +55,4 @@ verifyBookingsRouter.post('/verifybooking/:status/:bookingId',adminAuth,async(re
         res.status(500).json({message:err.message})
     }
 })
-
 module.exports = verifyBookingsRouter;
