@@ -60,7 +60,12 @@ userRouter.post('/login',async(req, res)=>{
           })
          }
            const token= await user.getJWT()
-          res.cookie("token",token)
+          res.cookie("token",token, {
+            httpOnly: true,
+            secure: true,       // must be true because Netlify is HTTPS
+            sameSite: 'None',   // must be 'None' for cross-origin cookies
+            maxAge: 24 * 60 * 60 * 1000  // 1 day
+          })
 
          res.status(200).json({
             success:true,
