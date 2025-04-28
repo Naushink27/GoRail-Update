@@ -57,7 +57,7 @@ if(!source && !destination && !number && !journeyDate && !seatType) {
 
 
  
-trainRouter.post("/train/book/:trainId", userAuth, async (req, res) => {
+trainRouter.post("/train/book/:trainId",  async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
