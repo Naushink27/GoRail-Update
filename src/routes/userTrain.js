@@ -11,6 +11,9 @@ const instance = new Razorpay({
   key_secret:process.env.RAZORPAY_KEY_SECRET,
 });
 
+console.log("Razorpay Key:", process.env.RAZORPAY_KEY_ID);
+console.log("Razorpay Secret:", process.env.RAZORPAY_SECRET);
+
 trainRouter.post('/train', async (req, res) => {
   try {
     let { source, destination, number, journeyDate ,seatType} = req.body;
@@ -57,15 +60,17 @@ if(!source && !destination && !number && !journeyDate && !seatType) {
 
 
  
-trainRouter.post("/train/book/:trainId",  async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+trainRouter.post("/train/book/:trainId",userAuth,  async (req, res) => {
+  
+  
 
   try {
     const user = req.user;
+    console.log("User details from book train API"+user)
     const { _id} = user;
     const { trainId } = req.params;
     const { journeyDate, seatType, passengers } = req.body;
+    console.log("Booking request:", req.body); // Log the booking request
 
     // Input validation
     if (!trainId || !mongoose.Types.ObjectId.isValid(trainId)) {
@@ -82,6 +87,7 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
     if (isNaN(parsedJourneyDate.getTime())) {
       return res.status(400).json({ message: 'Invalid journey date' });
     }
+    
 
     // Validate passengers
     for (const passenger of passengers) {
@@ -89,12 +95,13 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
         return res.status(400).json({ message: 'Each passenger must have a first name, last name, and age' });
       }
     }
-
+    
     // Find train
-    const train = await Train.findById(trainId).session(session);
+    const train = await Train.findById(trainId);
     if (!train) {
       return res.status(404).json({ message: 'Train not found' });
     }
+    console.log("Debugging", train); // Log the train details
     if (train.trainStatus !== 'available') {
       return res.status(400).json({ message: 'Train not available' });
     }
@@ -118,6 +125,10 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
       currency: 'INR',
       receipt: `receipt_${Date.now()}`,
     });
+    console.log("Razorpay order created:", order); // Log the Razorpay order
+    if(!order){
+      return res.status(500).json({ message: 'Failed to create Razorpay order' });
+    }
 
     // Create booking
     const booking = new Booking({
@@ -134,7 +145,7 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
       destination: train.destination,
       passengers, // Store passenger details
     });
-
+  console.log("Booking is:"+booking)
     // Update seat count
     seat.count -= passengers.length;
 
@@ -144,11 +155,13 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
     }
 
     // Save changes
-    await train.save({ session });
-    await booking.save({ session });
+    await train.save();
+    console.log("User details:", JSON.stringify(user, null, 2));
+console.log("Booking request:", JSON.stringify(req.body, null, 2));
+console.log("Train details:", JSON.stringify(train, null, 2));
 
-    // Commit transaction
-    await session.commitTransaction();
+    await booking.save();
+
 
     res.status(200).json({
       message: 'Booking created. Complete payment to confirm.',
@@ -158,12 +171,10 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
       bookingId: booking._id,
     });
   } catch (err) {
-    await session.abortTransaction();
+    
     console.error('Booking error:', err);
     res.status(500).json({ message: err.message || 'An error occurred during booking' });
-  } finally {
-    session.endSession();
-  }
+  } 
 });
 
 
@@ -171,6 +182,7 @@ trainRouter.get("/train/bookings", userAuth, async (req, res) => {
 
   try{
     const user=req.user;
+    console.log(user)
 
     const { _id } = user;
 
