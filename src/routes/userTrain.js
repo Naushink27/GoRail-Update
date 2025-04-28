@@ -63,7 +63,7 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
 
   try {
     const user = req.user;
-    const { _id: userId } = user;
+    const { _id} = user;
     const { trainId } = req.params;
     const { journeyDate, seatType, passengers } = req.body;
 
@@ -121,7 +121,7 @@ trainRouter.post("/train/book/:trainId",  async (req, res) => {
 
     // Create booking
     const booking = new Booking({
-      userId,
+      userId: _id,
       trainId: train._id,
       journeyDate: parsedJourneyDate,
       seatType,
