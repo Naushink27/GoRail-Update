@@ -62,11 +62,11 @@ Built using **MERN Stack**, styled beautifully with **Tailwind CSS** and **Daisy
 
 #### ➕ Add Train
 - Add new train details
-![Add Train](./screenshots/AddTrain.png)
+![Add Train](./Screenshots/AddTrain.png)
 
 #### ✏️ Update Train
 - Update train details
-![Update Train](./screenshots/Update.png)
+![Update Train](./Screenshots/Update.png)
 
 ---
 
@@ -75,7 +75,7 @@ Built using **MERN Stack**, styled beautifully with **Tailwind CSS** and **Daisy
 ### 🏠 Landing Page (Before Login)
 - Search train by source and destination
 - No login required to search
-![Landing Page](./screenshots/Landing%20page-user.png)
+![Landing Page](./Screenshots/Landing%20page-user.png)
 
 ### 📝 Sign Up / Login (JWT Authentication)
 - New users can register
@@ -84,7 +84,7 @@ Built using **MERN Stack**, styled beautifully with **Tailwind CSS** and **Daisy
 ### 🧾 Booking Train
 - Provide passenger details and seat type
 - Booking gets stored in database
-![Booking](./screenshots/Booking.png)
+![Booking](./Screenshots/Booking.png)
 
 ### 💳 Razorpay Payment Integration
 - After booking, user sees pending payment
@@ -102,7 +102,7 @@ Built using **MERN Stack**, styled beautifully with **Tailwind CSS** and **Daisy
 - "Contact Us" form
 - User can send queries to admin via email
 - Powered by **Nodemailer**
-![Contact Form](./screenshots/contact.png)
+![Contact Form](./Screenshots/contact.png)
 
 ---
 
@@ -115,3 +115,13 @@ git clone https://github.com/yourusername/gorail.git
 cd backend
 npm install
 npm run dev
+
+```
+## Deploy
+- Frontend deployed on: **Vercel**
+- Backend deployed on: **Railway**
+
+## Connect with Me
+- **linkedIn**:[LinkedIn](www.linkedin.com/in/naushink27)
+- **Github**:[github](www.github.com/Naushink27)
+  
