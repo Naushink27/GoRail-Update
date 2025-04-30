@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: "https://sprightly-llama-44c31f.netlify.app", // ✅ Update with your frontend URL
+  origin: "https://earnest-pasca-8e66b3.netlify.app", // ✅ Update with your frontend URL
   credentials: true, // ✅ Required for cookies/sessions
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
