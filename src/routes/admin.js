@@ -71,7 +71,6 @@ adminRouter.post("/add/train", adminAuth, async (req, res) => {
         });
 
         await  train.save();
-        console.log("Train added successfully:", train);
 
         res.status(201).json({ message: "Train added successfully!", train });
 

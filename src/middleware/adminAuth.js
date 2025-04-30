@@ -8,7 +8,7 @@ const adminAuth=async(req , res,next)=>{
         return res.status(401).json({ error: "Please login first" }); // ✅ Send 401 Unauthorized
       }
     const decodedData= jwt.verify(token, process.env.JWT_SECRET)
-    console.log(decodedData)
+  
 
     const {_id}=decodedData;
     const user= await User.findById(_id)

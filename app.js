@@ -36,8 +36,7 @@ app.get("/",(req,res)=>{
 })
 // Connect DB and start server
 connectDB().then(() => {
-  console.log("MongoDB Connected ✅");
+  
   app.listen(7777, () => {
-    console.log("Server running on port 7777 🚀");
   });
 }).catch((err) => console.error("DB Error:", err));

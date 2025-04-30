@@ -32,9 +32,7 @@ const sendMail = async (booking, status) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`📧 Email sent to ${booking.email}`);
   } catch (error) {
-    console.error('Email error:', error.message);
   }
 };
 

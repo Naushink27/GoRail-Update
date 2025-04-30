@@ -21,7 +21,6 @@ userRouter.post('/signup',async(req, res)=>{
             email,
             password: hashedPassword
         })
-        console.log(user)
         await user.save()
         res.send(user)
         

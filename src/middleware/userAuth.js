@@ -6,7 +6,7 @@ const userAuth = async (req, res, next) => {
     // ✅ Ensure req.cookies is defined before accessing `token`
     const token = req.cookies?.token 
   
-    console.log(token)
+
    
 
     if (!token) {
@@ -15,9 +15,9 @@ const userAuth = async (req, res, next) => {
     
 
     // ✅ Verify Token  
-    console.log("verifying JWT token")
+
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decodedData)
+   
    
     const { _id } = decodedData;
 
@@ -30,7 +30,7 @@ const userAuth = async (req, res, next) => {
     if(user.role!="user"){
       return res.status(401).json({error:"Cant access this page!!"})
     }
-console.log(user)
+
     req.user = user;
     next(); // ✅ Pass control to the next middleware
 
