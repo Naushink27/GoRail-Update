@@ -48,17 +48,17 @@ Built using **MERN Stack**, styled beautifully with **Tailwind CSS** and **Daisy
 - Secured using **JWT tokens**.
 
 ### 🖥️ Admin Dashboard
-![Admin Landing](./screenshots/Admin%20Landing.png)
+![Admin Landing](./Screenshots/Admin%20Landing.png)
 
 #### 👥 All Users
 - View all registered users
 - Delete any user
-![All Users](./screenshots/ALL%20USER.png)
+![All Users](./Screenshots/ALL%20USER.png)
 
 #### 📄 All Bookings
 - View all passenger bookings
 - Update journey status (Confirm or Cancel)
-![All Bookings](./screenshots/All%20bookings-admin.png)
+![All Bookings](./Screenshots/All%20bookings-admin.png)
 
 #### ➕ Add Train
 - Add new train details
