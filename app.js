@@ -10,6 +10,7 @@ const trainRouter = require("./src/routes/userTrain");
 const verifybookingsRouter = require("./src/routes/verifyBookings");
 const webhookRouter = require("./src/routes/paymentWebhook");
 
+
 // 👇 THIS MUST COME FIRST!
 app.use("/train/payment/webhook", express.raw({ type: "application/json" }));
 
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: "https://go-rail.vercel.app", // ✅ Update with your frontend URL
+  origin: "http://localhost:3000", // ✅ Update with your frontend URL
   credentials: true, // ✅ Required for cookies/sessions
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
