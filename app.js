@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: "https://go-rail-frontend-update.vercel.app", // ✅ Update with your frontend URL
+  origin: "https://go-rail-frontend-update-eh3p.vercel.app", // ✅ Update with your frontend URL
   credentials: true, // ✅ Required for cookies/sessions
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
